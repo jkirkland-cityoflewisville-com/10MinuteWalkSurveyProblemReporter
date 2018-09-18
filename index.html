@@ -23,50 +23,146 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">    
 
     <style>
-      
+        .container{
+            padding: 1.25em;
+            max-width: 800px;
+            box-shadow: inset 1px 1px 0 rgba(0,0,0,.1), inset 0 -1px 0 rgba(0,0,0,.07);   
+            margin-bottom: 6em;         
+        }
+        footer{
+            position: fixed;
+            left:0;
+            bottom:0;
+            width:100%;
+            text-align: center;
+            padding: 1em;
+            background-color: whitesmoke;
+        } 
+        .filler{
+            border-radius: 20px;
+            background-color: gray;
+            padding:1em;
+            margin-bottom: 1em;
+        }
+        /* The snackbar - position it at the bottom and in the middle of the screen */
+        #snackbar {
+            visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 2px; 
+            padding: 16px; position: fixed; z-index: 1; left: 50%; bottom: 30px;
+        }
+        /* Show the snackbar when clicking on a button (class added with JavaScript) */
+        #snackbar.show {
+            visibility: visible; /* Show the snackbar */
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        /* Animations to fade the snackbar in and out */
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;} 
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;} 
+            to {bottom: 0; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
     </style>
 </head>
-<body>
+<body class="grey lighten-4">
+
     <header>
-        <nav class="purple lighten-1">
+        <nav class="purple">
             <div class="nav-wrapper">
-                <a href="#" class="brand-logo">PARD</a>
+                <a href="#" class="brand-logo hide-on-small-only" style="margin-left:1em;">Walkability Survey - <small>Report a Problem</small></a>
+                <a href="#" class="brand-logo hide-on-med-and-up"><small>Report a Problem</small></a>
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
-                    <li><a href="sass.html">Survey</a></li>
+                    <li><a href="sass.html">Take the Post-Walk Survey</a></li>
                 </ul>
             </div>
         </nav>
     </header>
+    <center class="hide-on-med-and-up">City of Lewisville, Texas. Walkability Survey</center>
+    <br>
 
-    <main class="container">
+    <main class="container white">
         <h5>Pick the issue you observed</h5>
         <p>Your current location (latitude/longitude) will be recorded with your submission</p>
+        <hr>
+
+        <!--Radio button list of problem types (from server)-->
         <div id="problemTypesContainer" class="row">
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+        </div>  
 
+        <!--Other-->
+        <div class="row">
+            <div class="col s12" id="section99">
+                <h6 class="grey-text">Other</h6>
+            </div>
             
-        </div>        
+            <div class="col s12">
+                <label>
+                    <input id="problem_other_radio" type="radio" name="group1" onchange="handleRadioClick(this)"/> 
+                    <span class="black-text">
+                        <input placeholder="Type issue here" id="problem_other_text" type="text" class="validate">
+                    </span>
+                </label>                
+            </div>
+        </div>   
+        <br>
+        <br>   
+        <div id="snackbar">Some text some message..</div>
     </main>
-        
-    <a class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons">add</i></a>
-
-    <!-- materialize -->
     
+    <footer>
+        <a class="btn-large waves-effect waves-light red" onclick="submitProblem()">Submit</a>        
+    </footer>
+
+    
+    
+
+    <!--====================================================-->
+    <!--Script-->
+    <!--====================================================-->
     <script>
+
+        let _radioGroupValue = -1
+
         const init = () => {
             console.log("init")
             getProblemTypes()
         }
-        const postData = (url = '', data = {}) => {
+
+        const ajax = (url = '', data = {}) => {
             return fetch(url, {
                 method: "POST",                                
                 body: JSON.stringify(data)
             })
             .then(response => response.json())
-            .catch(error => console.error(`Fetch Error =\n`, error));
+            .catch(error => console.error('Fetch Error =\n', error));
         }
+
         const getProblemTypes = () => {
             
-            postData(`https://query.cityoflewisville.com/v2`, {
+            ajax('https://query.cityoflewisville.com/v2', {
                 webservice: "WalkabilitySurvey_Problems_GetProblemTypes"
             })
             .then(_data => {
@@ -77,16 +173,101 @@
             )
         }
 
-        const processProblemTypes = (_data) => {
-            console.log(_data)
+        const processProblemTypes = (_data) => {            
             
-            let _html = ""
+            //Dataset
+                let = _dataset = {}
+            
+            //Sections - unique list
+                let _sectionTitles = [...new Set(_data.map(item => item.sectiontitle ) )]
 
-            _data.forEach( _p => {
-                _html += '<div class="col s12"><p><label><input id="'+_p.ProblemId+'" type="radio" name="group1"/> <span>'+_p.ProblemTitle+'</span></label></p></div>'
-            })
+                _sectionTitles.forEach( (_s, _i) => {
+                    _dataset["section" + (_i + 1)] = '<div class="col s12" id="section' + (_i + 1)+'"><h6 class="grey-text">'+_s+'</h6></div>'                
+                })
 
-            document.getElementById("problemTypesContainer").innerHTML = _html
+            //Problem Types
+                let _problemTypes = _data
+
+                _problemTypes.forEach( _p => {                
+                    _dataset["section" + _p.sectionid] = _dataset["section" + _p.sectionid] + '<div class="col s12"><p><label><input id="'+_p.problemid+'" type="radio" name="group1" onclick="handleRadioClick(this)"/> <span class="black-text">'+_p.problemtitle+'</span></label></p></div>'
+                
+                }) 
+            
+            //Final html
+                let _html = []
+
+                Object.keys(_dataset).forEach(_d => {
+                    _html.push(_dataset[_d])
+                })
+
+                document.getElementById("problemTypesContainer").innerHTML = _html.join("")          
+        }
+
+        const submitProblem = () => {
+            console.log("submitProblem()")
+
+            let _problemId = getSelectedProblemId()
+            let _othertext = document.getElementById("problem_other_text").value
+
+            const onGeolocationSuccess = (_position) => {
+                let _latitude = _position.coords.latitude
+                let _longitude = _position.coords.longitude
+
+                console.log([_latitude,_longitude])
+                
+                ajax('https://query.cityoflewisville.com/v2', {
+                    webservice: "WalkabilitySurvey_Problems_NewSubmission",
+                    problemid: _problemId,
+                    othertext: _othertext,
+                    latitude: _latitude,
+                    longitude: _longitude
+                })
+                .then(_data => {
+                    processSubmission(_data[0])
+                })
+                .catch(_error => 
+                    console.error(_error)
+                )                
+            }
+            navigator.geolocation.getCurrentPosition(onGeolocationSuccess)             
+        }
+
+        const processSubmission = (_data) => {
+            console.log(_data[0])
+            
+            if (_data[0].message.toLowerCase() == "success"){
+                alertUser("Successfully Submitted")
+            }
+        }
+
+        const getSelectedProblemId = () => {
+            let _id = document.querySelector('input[name="group1"]:checked').id
+            if (_id == "problem_other_radio") _id = -1
+            return _id
+        }
+
+        const handleRadioClick = (_this) => {
+            let _old = _radioGroupValue
+            let _new = _this.value
+
+            //Enable/disable the "other" category's textbox
+            if (document.querySelector('input[name="group1"]:checked').id == "problem_other_radio"){
+                document.getElementById("problem_other_text").disabled = false
+            }else{
+                document.getElementById("problem_other_text").disabled = true
+            }
+        }
+
+        const alertUser = (_msg) => {
+            // Get the snackbar DIV
+            let x = document.getElementById("snackbar");
+
+            // Add the "show" class to DIV
+            x.className = "show";
+            x.innerHTML = _msg
+
+            // After 3 seconds, remove the show class from DIV
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
         }
 
         document.addEventListener('DOMContentLoaded', function() {
