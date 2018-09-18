@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+
+    <title>Report Walk Problem</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#603cba">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- styles -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Product+Sans:400,400i,700,700i" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Product+Sans:400,400i,700,700i" rel="stylesheet" type="text/css">
+
+    <!-- styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">    
+
+    <style>
+      
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="purple lighten-1">
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo">PARD</a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li><a href="sass.html">Survey</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h5>Pick the issue you observed</h5>
+        <p>Your current location (latitude/longitude) will be recorded with your submission</p>
+        <div id="problemTypesContainer" class="row">
+
+            
+        </div>        
+    </main>
+        
+    <a class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons">add</i></a>
+
+    <!-- materialize -->
+    
+    <script>
+        const init = () => {
+            console.log("init")
+            getProblemTypes()
+        }
+        const postData = (url = '', data = {}) => {
+            return fetch(url, {
+                method: "POST",                                
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .catch(error => console.error(`Fetch Error =\n`, error));
+        }
+        const getProblemTypes = () => {
+            
+            postData(`https://query.cityoflewisville.com/v2`, {
+                webservice: "WalkabilitySurvey_Problems_GetProblemTypes"
+            })
+            .then(_data => {
+                processProblemTypes(_data[0])
+            })
+            .catch(_error => 
+                console.error(_error)
+            )
+        }
+
+        const processProblemTypes = (_data) => {
+            console.log(_data)
+            
+            let _html = ""
+
+            _data.forEach( _p => {
+                _html += '<div class="col s12"><p><label><input id="'+_p.ProblemId+'" type="radio" name="group1"/> <span>'+_p.ProblemTitle+'</span></label></p></div>'
+            })
+
+            document.getElementById("problemTypesContainer").innerHTML = _html
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            init()
+        })
+    </script>
+</body>
+</html>
