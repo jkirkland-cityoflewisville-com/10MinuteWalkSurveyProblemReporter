@@ -40,15 +40,36 @@
         } 
         .filler{
             border-radius: 20px;
-            background-color: gray;
+            background-color: whitesmoke;
+            color: whitesmoke;
             padding:1em;
             margin-bottom: 1em;
+            height: 25px;
+            animation: fadein2 0.5s, fadeout2 0.5s 1.5s;
         }
+        @keyframes fadein2 {
+            from {left: 0; opacity: 0;}
+            to {right: 100%; opacity: 1;}
+        }
+        @keyframes fadeout2 {
+            from {right: 0; opacity: 1;}
+            to {left: 100%; opacity: 0;}
+        }
+
         /* The snackbar - position it at the bottom and in the middle of the screen */
         #snackbar {
-            visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 2px; 
-            padding: 16px; position: fixed; z-index: 1; left: 50%; bottom: 30px;
-        }
+            visibility: hidden; 
+            min-width: 250px; 
+            background-color: #333; 
+            color: #fff; 
+            text-align: center; 
+            border-radius: 2px; 
+            padding: 16px; 
+            position: fixed; 
+            z-index: 1;
+            bottom: 30px;
+            margin:0 auto;
+        }       
         /* Show the snackbar when clicking on a button (class added with JavaScript) */
         #snackbar.show {
             visibility: visible; /* Show the snackbar */
@@ -56,25 +77,15 @@
             animation: fadein 0.5s, fadeout 0.5s 2.5s;
         }
         /* Animations to fade the snackbar in and out */
-        @-webkit-keyframes fadein {
-            from {bottom: 0; opacity: 0;} 
-            to {bottom: 30px; opacity: 1;}
-        }
-
         @keyframes fadein {
             from {bottom: 0; opacity: 0;}
             to {bottom: 30px; opacity: 1;}
         }
-
-        @-webkit-keyframes fadeout {
-            from {bottom: 30px; opacity: 1;} 
-            to {bottom: 0; opacity: 0;}
-        }
-
         @keyframes fadeout {
             from {bottom: 30px; opacity: 1;}
             to {bottom: 0; opacity: 0;}
         }
+        
     </style>
 </head>
 <body class="grey lighten-4">
@@ -85,7 +96,7 @@
                 <a href="#" class="brand-logo hide-on-small-only" style="margin-left:1em;">Walkability Survey - <small>Report a Problem</small></a>
                 <a href="#" class="brand-logo hide-on-med-and-up"><small>Report a Problem</small></a>
                 <ul id="nav-mobile" class="right hide-on-med-and-down">
-                    <li><a href="sass.html">Take the Post-Walk Survey</a></li>
+                    <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSdQBU5Hb623j3ogQEHtXK37HDKxjaLLy1DjOJZhCjVwJ_un3w/viewform">Take the Post-Walk Survey</a></li>
                 </ul>
             </div>
         </nav>
@@ -100,6 +111,16 @@
 
         <!--Radio button list of problem types (from server)-->
         <div id="problemTypesContainer" class="row">
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
+            <div class="col s12 filler">...</div>
             <div class="col s12 filler">...</div>
             <div class="col s12 filler">...</div>
             <div class="col s12 filler">...</div>
@@ -129,9 +150,8 @@
         </div>   
         <br>
         <br>   
-        <div id="snackbar">Some text some message..</div>
     </main>
-    
+    <div id="snackbar">Some text some message..</div>
     <footer>
         <a class="btn-large waves-effect waves-light red" onclick="submitProblem()">Submit</a>        
     </footer>
@@ -148,7 +168,25 @@
 
         const init = () => {
             console.log("init")
-            getProblemTypes()
+
+            //Get problem types from server
+            setTimeout( () => {
+                getProblemTypes()
+            },500)
+            
+
+            //Geolocation authorized?
+            if ( window.localStorage.getItem('allowGeolocation') != true ){
+
+                 setTimeout( () => {
+                    navigator.geolocation.getCurrentPosition( (_position) => {
+                        let _latitude = _position.coords.latitude
+                        let _longitude = _position.coords.longitude
+                        alertUser("Your location: " + _latitude + "," + _longitude )
+                        window.localStorage.setItem('allowGeolocation',true)
+                    })
+                 },1000)                 
+            }
         }
 
         const ajax = (url = '', data = {}) => {
